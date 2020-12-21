@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-secret-app
+  labels:
+    app: k8s-secret-app
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: k8s-secret-app
+  template:
+    metadata: 
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-status: "update"
+        vault.hashicorp.com/tls-skip-verify: "true" 
+        vault.hashicorp.com/auth-path: "auth/gcpcluster001" 
+        vault.hashicorp.com/agent-inject-secret-cert.txt: "pki/issue/server"
+        vault.hashicorp.com/agent-inject-template-cert.txt: |
+          {{ with secret "pki/issue/server" "common_name=noddyapp.com" -}}
+          {{ .Data.private_key }}
+          {{ .Data.certificate }}
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-kvsecrets.txt: "kv2/noddyapp/config"
+        vault.hashicorp.com/agent-inject-template-kvsecrets.txt: |
+          {{ with secret "kv2/noddyapp/config" -}}
+          username = {{ .Data.data.username }} 
+          password = {{ .Data.data.password }}
+          {{- end }}
+        vault.hashicorp.com/role: "noddyapp"
+      name: k8s-secret-app
+      labels:
+        app: k8s-secret-app
+    spec:
+      serviceAccountName: vault-auth
+      automountServiceAccountToken: true
+      containers:
+        - name: k8s-secret-app
+          image: nginx
+          ports:
+          - containerPort: 5000
+            protocol: TCP

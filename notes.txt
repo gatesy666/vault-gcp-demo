@@ -1,0 +1,80 @@
+
+
+-----------------------------------
+I N F O - store stuff here as we go
+-----------------------------------
+
+Initial Root Token: <token>
+vault address: https://address:8200
+app cluster address: <address>
+
+---------
+B E G I N
+---------
+
+Create vault certs and copy to this dir - certs/main.tf - run terraform in that dir to create certs - amend as necessary
+
+Create vault cluster
+
+see gcp-project-bootstrap/notes.txt & gcp-project-bootstrap terraform
+
+Run vault terraform
+
+---
+
+*** LOG IN TO CONTAINER
+kubectl exec -it vault-0 sh
+
+vault status
+vault operator init
+vault status
+export VAULT_TOKEN=<value from above>
+vault operator raft list-peers
+vault operator raft join -leader-ca-cert="$(cat /vault/userconfig/vault-tls/vault_ca)" --address "https://vault-1.vault-internal:8200" "https://vault-0.vault-internal:8200"
+vault operator raft join -leader-ca-cert="$(cat /vault/userconfig/vault-tls/vault_ca)" --address "https://vault-2.vault-internal:8200" "https://vault-0.vault-internal:8200"
+vault operator raft list-peers
+
+---
+on local laptop:
+
+export VAULT_ADDR=<lb address>
+export VAULT_TOKEN=<value from above>
+export VAULT_SKIP_VERIFY=1
+
+---
+
+Create app cluster
+
+see gcp-project-bootstrap/notes.txt
+
+---
+
+*** EDIT App K8S Host in vaultauth_strap.sh and make sure in app cluster context for kubectl !!! ***
+
+./vaultauth_strap.sh
+
+log in to Vault UI
+
+./vaultsecrets_strap.sh
+
+check secrets in UI
+
+---
+
+install sidecar injector
+
+helm install vault hashicorp/vault --set "injector.externalVaultAddr=<vault lb address>" 
+kubectl get pods
+
+---
+
+Deploy App
+
+kubectl apply -f ./deploy.yaml
+kubectl get pods
+
+Show secrets
+kubectl exec -it $(kubectl get pod --selector=app=k8s-secret-app -o name) -c k8s-secret-app -- cat /vault/secrets/kvsecrets.txt
+kubectl exec -it $(kubectl get pod --selector=app=k8s-secret-app -o name) -c k8s-secret-app -- cat /vault/secrets/cert.txt
+
+(Kv2 will refresh every 5 mins - so change kv2 value to show this)

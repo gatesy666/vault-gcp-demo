@@ -1,0 +1,33 @@
+CLI Creation of GKE Clusters
+
+Create Service Account & KMS first (via tf) - cd to this directory and run terraform separately from vault tf
+
+export GOOGLE_CLOUD_PROJECT="my-project-666666"
+
+Vault Cluster
+
+gcloud container clusters create vault \
+    --cluster-version 1.16 \
+    --enable-autorepair \
+    --enable-autoupgrade \
+    --enable-ip-alias \
+    --machine-type n1-standard-1 \
+    --node-version 1.16 \
+    --num-nodes 1 \
+    --region europe-west2 \
+    --scopes cloud-platform \
+    --service-account "vault-server@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com"
+
+App Cluster
+
+gcloud container clusters create app \
+    --cluster-version 1.16 \
+    --enable-autorepair \
+    --enable-autoupgrade \
+    --enable-ip-alias \
+    --machine-type n1-standard-1 \
+    --node-version 1.16 \
+    --num-nodes 1 \
+    --region europe-west2 \
+    --scopes cloud-platform \
+    --service-account "vault-server@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com"
