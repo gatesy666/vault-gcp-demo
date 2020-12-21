@@ -1,4 +1,8 @@
+-------------
+P R E R E Q S
+-------------
 
+helm repo add hashicorp https://helm.releases.hashicorp.com
 
 -----------------------------------
 I N F O - store stuff here as we go
