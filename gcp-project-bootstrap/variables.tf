@@ -16,22 +16,22 @@ variable "project" {
 
 # IAM Service Account
 
-# variable "service_account_iam_roles" {
-#   type = list(string)
-#   default = [
-#     "roles/logging.logWriter",
-#     "roles/monitoring.metricWriter",
-#     "roles/monitoring.viewer",
-#     "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   ]
-#   description = "List of IAM roles to assign to the service account."
-# }
-
 variable "service_account_iam_roles" {
   type = list(string)
-  default = []
+  default = [
+    "roles/logging.logWriter",
+    "roles/monitoring.metricWriter",
+    "roles/monitoring.viewer",
+    "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  ]
   description = "List of IAM roles to assign to the service account."
 }
+
+# variable "service_account_iam_roles" {
+#   type = list(string)
+#   default = []
+#   description = "List of IAM roles to assign to the service account."
+# }
 
 variable "service_account_custom_iam_roles" {
   type        = list(string)
