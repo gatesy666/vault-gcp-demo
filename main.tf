@@ -42,6 +42,11 @@ resource "kubernetes_secret" "kms-creds" {
   type = "Opaque"
 }
 
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
+  }
+}
 
 resource "helm_release" "vault" {
   name  = "vault"
